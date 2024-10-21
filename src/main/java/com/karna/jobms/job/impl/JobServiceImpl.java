@@ -4,10 +4,15 @@ package com.karna.jobms.job.impl;
 import com.karna.jobms.job.Job;
 import com.karna.jobms.job.JobRepository;
 import com.karna.jobms.job.JobService;
-import com.karna.jobms.job.dto.JobWithCompanyDTO;
+import com.karna.jobms.job.dto.JobDTO;
 import com.karna.jobms.job.external.Company;
+import com.karna.jobms.job.external.Review;
 import com.karna.jobms.job.mapper.JobMapper;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,16 +35,22 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<JobWithCompanyDTO> findAll() {
+    public List<JobDTO> findAll() {
         List<Job> jobs = jobRepository.findAll();
         return jobs.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
-    private JobWithCompanyDTO convertToDto(Job job){
+    private JobDTO convertToDto(Job job){
 
         Company company = restTemplate.getForObject("http://COMPANY-SERVICE:8082/companies/"+job.getCompanyId(), Company.class);
-        JobWithCompanyDTO jobWithCompanyDTO = JobMapper.mapToJobWithCompanyDTO(job,company);
-        return jobWithCompanyDTO;
+        List<Review> reviews = restTemplate.exchange("http://REVIEW-SERVICE:8083/reviews?companyId=" + job.getCompanyId(),
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<Review>>() {
+        }).getBody();
+
+        JobDTO jobDTO = JobMapper.mapToJobWithCompanyDTO(job,company,reviews);
+        return jobDTO;
     }
 
     @Override
@@ -53,8 +64,8 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public JobWithCompanyDTO findJobById(Long id) {
-        JobWithCompanyDTO jobWithCompanyDTO = new JobWithCompanyDTO();
+    public JobDTO findJobById(Long id) {
+        JobDTO jobDTO = new JobDTO();
         //return jobs.stream().filter(j->j.getId().equals(id)).findFirst().orElse(null);
         Job job= jobRepository.findById(id).orElse(null);
         return convertToDto(job);

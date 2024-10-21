@@ -1,8 +1,11 @@
 package com.karna.jobms.job.dto;
 
 import com.karna.jobms.job.external.Company;
+import com.karna.jobms.job.external.Review;
 
-public class JobWithCompanyDTO {
+import java.util.List;
+
+public class JobDTO {
 
     private Long id;
     private String title;
@@ -12,6 +15,8 @@ public class JobWithCompanyDTO {
     private String location;
 
     private Company company;
+
+    private List<Review> reviews;
 
     public Long getId() {
         return id;
@@ -68,5 +73,13 @@ public class JobWithCompanyDTO {
 
     public void setCompany(Company company) {
         this.company = company;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
     }
 }

@@ -1,6 +1,6 @@
 package com.karna.jobms.job;
 
-import com.karna.jobms.job.dto.JobWithCompanyDTO;
+import com.karna.jobms.job.dto.JobDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +18,7 @@ public class JobController {
     }
 
     @GetMapping
-    public ResponseEntity<List<JobWithCompanyDTO>> findAll(){
+    public ResponseEntity<List<JobDTO>> findAll(){
         return ResponseEntity.ok(jobService.findAll());
     }
 
@@ -30,7 +30,7 @@ public class JobController {
     }
 
     @GetMapping("/{id}")
-        public ResponseEntity<JobWithCompanyDTO> getJobById(@PathVariable Long id){
+        public ResponseEntity<JobDTO> getJobById(@PathVariable Long id){
         if(jobService.findJobById(id)!=null)
             return new ResponseEntity<>(jobService.findJobById(id), HttpStatus.OK);
         else

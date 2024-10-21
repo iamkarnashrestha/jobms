@@ -1,14 +1,14 @@
 package com.karna.jobms.job;
 
-import com.karna.jobms.job.dto.JobWithCompanyDTO;
+import com.karna.jobms.job.dto.JobDTO;
 
 import java.util.List;
 
 public interface JobService {
-    List<JobWithCompanyDTO> findAll();
+    List<JobDTO> findAll();
     void createJob(Job job);
 
-    JobWithCompanyDTO findJobById(Long id);
+    JobDTO findJobById(Long id);
 
     boolean deleteById(Long id);
 
