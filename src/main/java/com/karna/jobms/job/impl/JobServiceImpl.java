@@ -4,6 +4,8 @@ package com.karna.jobms.job.impl;
 import com.karna.jobms.job.Job;
 import com.karna.jobms.job.JobRepository;
 import com.karna.jobms.job.JobService;
+import com.karna.jobms.job.clients.CompanyClient;
+import com.karna.jobms.job.clients.ReviewClient;
 import com.karna.jobms.job.dto.JobDTO;
 import com.karna.jobms.job.external.Company;
 import com.karna.jobms.job.external.Review;
@@ -29,9 +31,14 @@ public class JobServiceImpl implements JobService {
     @Autowired
     RestTemplate restTemplate;
 
+    private CompanyClient companyClient;
+    private ReviewClient reviewClient;
 
-    public JobServiceImpl(JobRepository jobRepository) {
+
+    public JobServiceImpl(JobRepository jobRepository, CompanyClient companyClient, ReviewClient reviewClient) {
         this.jobRepository = jobRepository;
+        this.companyClient = companyClient;
+        this.reviewClient = reviewClient;
     }
 
     @Override
@@ -41,13 +48,17 @@ public class JobServiceImpl implements JobService {
     }
 
     private JobDTO convertToDto(Job job){
+// Rest template
+//        Company company = restTemplate.getForObject("http://COMPANY-SERVICE:8082/companies/"+job.getCompanyId(), Company.class);
+//        List<Review> reviews = restTemplate.exchange("http://REVIEW-SERVICE:8083/reviews?companyId=" + job.getCompanyId(),
+//                HttpMethod.GET,
+//                null,
+//                new ParameterizedTypeReference<List<Review>>() {
+//        }).getBody();
+        //Open Feign
 
-        Company company = restTemplate.getForObject("http://COMPANY-SERVICE:8082/companies/"+job.getCompanyId(), Company.class);
-        List<Review> reviews = restTemplate.exchange("http://REVIEW-SERVICE:8083/reviews?companyId=" + job.getCompanyId(),
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<Review>>() {
-        }).getBody();
+        Company company = companyClient.getCompany(job.getCompanyId());
+        List<Review> reviews = reviewClient.getReviews(job.getCompanyId());
 
         JobDTO jobDTO = JobMapper.mapToJobWithCompanyDTO(job,company,reviews);
         return jobDTO;
@@ -65,7 +76,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobDTO findJobById(Long id) {
-        JobDTO jobDTO = new JobDTO();
+
         //return jobs.stream().filter(j->j.getId().equals(id)).findFirst().orElse(null);
         Job job= jobRepository.findById(id).orElse(null);
         return convertToDto(job);
